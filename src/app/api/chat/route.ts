@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import { SYSTEM_PROMPT } from '@/lib/system-prompt';
 
 export async function POST(req: NextRequest) {
@@ -9,10 +9,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'your-gemini-api-key-here') {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
     return NextResponse.json(
-      { error: 'Gemini API key not configured. Set GEMINI_API_KEY in .env.local' },
+      { error: 'Anthropic API key not configured. Set ANTHROPIC_API_KEY in .env.local' },
       { status: 500 }
     );
   }
@@ -20,34 +20,33 @@ export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      systemInstruction: SYSTEM_PROMPT,
-    });
+    const anthropic = new Anthropic({ apiKey });
 
-    // Build chat history from messages (excluding the latest user message)
-    const history = messages.slice(0, -1).map((msg: { role: string; content: string }) => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }],
+    const chatMessages = messages.map((msg: { role: string; content: string }) => ({
+      role: msg.role as 'user' | 'assistant',
+      content: msg.content,
     }));
 
-    const chat = model.startChat({ history });
-
-    // Get the latest user message
-    const latestMessage = messages[messages.length - 1].content;
-
-    // Stream the response
-    const result = await chat.sendMessageStream(latestMessage);
+    const stream = anthropic.messages.stream({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: chatMessages,
+    });
 
     const encoder = new TextEncoder();
-    const stream = new ReadableStream({
+    const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            if (text) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+          for await (const event of stream) {
+            if (
+              event.type === 'content_block_delta' &&
+              event.delta.type === 'text_delta'
+            ) {
+              const text = event.delta.text;
+              if (text) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+              }
             }
           }
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
@@ -62,7 +61,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return new Response(stream, {
+    return new Response(readableStream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -71,6 +70,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Chat API error:', error);
-    return NextResponse.json({ error: 'Failed to generate response' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to generate response';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
