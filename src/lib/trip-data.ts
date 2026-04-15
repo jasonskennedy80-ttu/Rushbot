@@ -70,7 +70,7 @@ Dave:
   Timing and other info: TBD
   Transportation: TBD
 
-Jason (Kennedy):
+Stew Kennedy:
   Show(s): TBD
   Tickets: TBD
   Housing: June 6 – June 10

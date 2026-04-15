@@ -7,6 +7,26 @@ interface Message {
   content: string;
 }
 
+// ===== RENDER MESSAGE WITH IMAGES =====
+function renderMessageContent(content: string) {
+  // Split content by markdown image pattern: ![alt](src)
+  const parts = content.split(/(!\[.*?\]\(.*?\))/);
+  return parts.map((part, i) => {
+    const imgMatch = part.match(/^!\[(.*?)\]\((.*?)\)$/);
+    if (imgMatch) {
+      return (
+        <img
+          key={i}
+          src={imgMatch[2]}
+          alt={imgMatch[1]}
+          className="message-image"
+        />
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 // ===== LOGIN COMPONENT =====
 function LoginPage({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState('');
@@ -222,7 +242,7 @@ function ChatPage() {
                 <div className="message-avatar">
                   {msg.role === 'assistant' ? '🎸' : '👤'}
                 </div>
-                <div className="message-bubble">{msg.content}</div>
+                <div className="message-bubble">{renderMessageContent(msg.content)}</div>
               </div>
             ))}
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
