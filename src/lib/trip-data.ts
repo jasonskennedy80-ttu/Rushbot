@@ -69,4 +69,13 @@ Dave:
   Housing: Joining?
   Timing and other info: TBD
   Transportation: TBD
+
+Jason (Kennedy):
+  Show(s): TBD
+  Tickets: TBD
+  Housing: June 6 – June 10
+  Flight Info: 
+    Depart: Sat June 6 - Southwest WN 3161, DAL 1:50PM → LAX 3:00PM (non-stop, 3h 10m)
+    Return: Wed June 10 - Southwest WN 716, LAX 4:10PM → DAL 9:15PM (non-stop, 3h 5m)
+  Transportation: TBD
 `;
