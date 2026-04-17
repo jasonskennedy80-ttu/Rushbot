@@ -429,6 +429,14 @@ body {
   animation: pulse 2s ease-in-out infinite;
 }
 
+.welcome-logo {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  margin-bottom: 8px;
+  animation: pulse 3s ease-in-out infinite;
+}
+
 .welcome-container h2 {
   font-size: 24px;
   font-weight: 700;

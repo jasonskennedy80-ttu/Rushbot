@@ -236,7 +236,7 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
       <div className="chat-messages">
         {messages.length === 0 ? (
           <div className="welcome-container">
-            <span className="welcome-emoji">🎸</span>
+            <img src="/images/rush-logo.png" alt="Rush" className="welcome-logo" />
             <h2>Hey! It&apos;s Lerxst!</h2>
             <p>
               Welcome to the Rush LA Trip chatbot. Ask me about the trip details,
