@@ -130,11 +130,37 @@ body {
   line-height: 1.5;
 }
 
-.login-card .logo-emoji {
-  font-size: 64px;
-  margin-bottom: 20px;
+.login-card .login-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  margin-bottom: 16px;
+  border-radius: var(--radius-md);
   display: block;
-  animation: pulse 2s ease-in-out infinite;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.logout-button {
+  margin-left: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.logout-button:hover {
+  background: rgba(196, 18, 48, 0.12);
+  border-color: var(--border-glow);
+  color: var(--text-primary);
 }
 
 .login-form {

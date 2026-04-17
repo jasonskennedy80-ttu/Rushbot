@@ -75,7 +75,7 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="login-container">
       <div className="login-card">
-        <span className="logo-emoji">🎸</span>
+        <img src="/images/rush-logo.png" alt="Rush" className="login-logo" />
         <h1>RushBot</h1>
         <p className="subtitle">
           Your personal Alex Lifeson chatbot<br />
@@ -106,12 +106,17 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
 }
 
 // ===== CHAT COMPONENT =====
-function ChatPage() {
+function ChatPage({ onLogout }: { onLogout: () => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    onLogout();
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -222,6 +227,9 @@ function ChatPage() {
           <p>RushBot • LA Trip June 2026</p>
         </div>
         <div className="chat-header-badge">🌟 Rush</div>
+        <button className="logout-button" onClick={handleLogout} title="Back to login">
+          ← Exit
+        </button>
       </div>
 
       {/* Messages */}
@@ -339,7 +347,7 @@ export default function Home() {
     <>
       <div className="starfield" />
       {authenticated ? (
-        <ChatPage />
+        <ChatPage onLogout={() => setAuthenticated(false)} />
       ) : (
         <LoginPage onLogin={() => setAuthenticated(true)} />
       )}
