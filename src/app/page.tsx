@@ -9,10 +9,16 @@ interface Message {
 
 // ===== RENDER MESSAGE WITH IMAGES =====
 function renderMessageContent(content: string) {
-  // Split content by markdown image pattern: ![alt](src)
-  const parts = content.split(/(!\[.*?\]\(.*?\))/);
+  // Replace special token with image markdown (fallback injection)
+  const processed = content.replace(/\{\{MITCHS_DREAM\}\}/g, '![Mitch\'s Dream](/images/mitchs-dream.png)');
+
+  // Split on markdown image pattern: ![alt](url)
+  const imageRegex = /(!\[[^\]]*\]\([^)]+\))/g;
+  const parts = processed.split(imageRegex);
+
   return parts.map((part, i) => {
-    const imgMatch = part.match(/^!\[(.*?)\]\((.*?)\)$/);
+    // Check if this part is an image
+    const imgMatch = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     if (imgMatch) {
       return (
         <img
@@ -20,10 +26,16 @@ function renderMessageContent(content: string) {
           src={imgMatch[2]}
           alt={imgMatch[1]}
           className="message-image"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
       );
     }
-    return <span key={i}>{part}</span>;
+    // Render text with newlines
+    return (
+      <span key={i} style={{ whiteSpace: 'pre-wrap' }}>
+        {part}
+      </span>
+    );
   });
 }
 
