@@ -131,14 +131,14 @@ body {
 }
 
 .login-card .login-logo {
-  width: 140px;
-  height: 140px;
+  width: 200px;
+  height: auto;
   object-fit: contain;
   margin-bottom: 16px;
-  border-radius: var(--radius-md);
   display: block;
   margin-left: auto;
   margin-right: auto;
+  mix-blend-mode: screen;
 }
 
 .logout-button {
@@ -430,11 +430,11 @@ body {
 }
 
 .welcome-logo {
-  width: 160px;
-  height: 160px;
+  width: 240px;
+  height: auto;
   object-fit: contain;
   margin-bottom: 8px;
-  animation: pulse 3s ease-in-out infinite;
+  mix-blend-mode: screen;
 }
 
 .welcome-container h2 {
