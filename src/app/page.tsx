@@ -15,7 +15,7 @@ const ITINERARY: Array<{
     label: 'Arrival Day',
     events: [
       { time: '2:02 PM', desc: 'Jesse arrives — AA1213 to LAX', icon: '✈️' },
-      { time: '3:00 PM', desc: 'Stew arrives — WN 3161 DAL→LAX', icon: '✈️' },
+      { time: '3:00 PM', desc: 'Stew, Mark & Matt arrive — WN 3161 DAL→LAX', icon: '✈️' },
       { time: 'Afternoon', desc: 'Check in at 99 Hermosa Ave, Hermosa Beach', icon: '🏠' },
       { time: 'Evening', desc: 'Mitch arrives (late)', icon: '🚗' },
       { time: 'TBD', desc: 'Group dinner — first night together!', icon: '🍕' },
