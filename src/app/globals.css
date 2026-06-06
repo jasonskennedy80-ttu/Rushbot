@@ -251,6 +251,48 @@ body {
   animation: shake 0.4s ease-out;
 }
 
+.name-picker {
+  margin-bottom: 12px;
+}
+
+.name-picker-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.name-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.name-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.name-chip:hover {
+  border-color: var(--rush-gold);
+  color: var(--text-primary);
+}
+
+.name-chip.selected {
+  background: rgba(212, 168, 67, 0.15);
+  border-color: var(--rush-gold);
+  color: var(--rush-gold);
+  font-weight: 600;
+}
+
 /* ===== CHAT LAYOUT ===== */
 .chat-container {
   display: flex;
@@ -949,6 +991,134 @@ body {
 .star.disabled {
   opacity: 0.25;
   cursor: not-allowed;
+}
+
+/* ===== ALBUM TABS & RESULTS ===== */
+.album-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.album-tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.album-tab.active {
+  color: var(--rush-gold);
+  border-bottom-color: var(--rush-gold);
+}
+
+.album-tab:hover:not(.active) {
+  color: var(--text-secondary);
+}
+
+.results-body {
+  padding: 16px 24px !important;
+}
+
+.results-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 0;
+  font-style: italic;
+}
+
+.results-section {
+  margin-bottom: 24px;
+}
+
+.results-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--rush-gold);
+  margin-bottom: 4px;
+}
+
+.results-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.results-album-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.results-album-row:last-child {
+  border-bottom: none;
+}
+
+.results-rank {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rush-gold);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.results-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.results-stars {
+  color: var(--rush-gold);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.results-avg {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.user-top5 {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.user-top5-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.user-top5-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.user-top5-album {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.user-top5-stars {
+  color: var(--rush-gold);
+  font-size: 13px;
+  letter-spacing: 1px;
 }
 
 /* ===== SETLIST PREDICTIONS ===== */

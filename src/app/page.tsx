@@ -149,6 +149,11 @@ const DINNER_RECS = [
   },
 ];
 
+const TRIP_MEMBERS = [
+  'Jason', 'Mitch', 'Tom', 'Dawn', 'Mark',
+  'Matt R', 'Sam', 'Stew', 'Kirk', 'Matt E', 'Dave',
+];
+
 // ===== COUNTDOWN TIMER LOGIC =====
 const SHOW_DATES = [
   { label: 'Show 1 — June 7', date: new Date('2026-06-07T20:00:00-07:00') },
@@ -261,8 +266,9 @@ function renderMessageContent(content: string) {
 }
 
 // ===== LOGIN COMPONENT =====
-function LoginPage({ onLogin }: { onLogin: () => void }) {
+function LoginPage({ onLogin }: { onLogin: (name: string) => void }) {
   const [password, setPassword] = useState('');
+  const [selectedName, setSelectedName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -274,19 +280,20 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!selectedName) { setError('Pick your name!'); return; }
     setLoading(true);
 
     try {
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, name: selectedName }),
       });
 
       const data = await res.json();
 
       if (data.success) {
-        onLogin();
+        onLogin(selectedName);
       } else {
         setError(data.error || 'Wrong password');
         setPassword('');
@@ -312,6 +319,21 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
           <p className="quote-source">— {quote.source}</p>
         </div>
         <form className="login-form" onSubmit={handleSubmit}>
+          <div className="name-picker">
+            <label className="name-picker-label">Who are you?</label>
+            <div className="name-chips">
+              {TRIP_MEMBERS.map(name => (
+                <button
+                  key={name}
+                  type="button"
+                  className={`name-chip ${selectedName === name ? 'selected' : ''}`}
+                  onClick={() => setSelectedName(name)}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
           <input
             type="password"
             className="login-input"
@@ -325,7 +347,7 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
           <button
             type="submit"
             className="login-button"
-            disabled={loading || !password}
+            disabled={loading || !password || !selectedName}
           >
             {loading ? 'Checking...' : 'Enter the Limelight'}
           </button>
@@ -336,7 +358,7 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
 }
 
 // ===== CHAT COMPONENT =====
-function ChatPage({ onLogout }: { onLogout: () => void }) {
+function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser: string }) {
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window === 'undefined') return [];
     try {
@@ -351,6 +373,8 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
   const [itineraryTab, setItineraryTab] = useState<'schedule' | 'tickets'>('schedule');
   const [showDinnerRecs, setShowDinnerRecs] = useState(false);
   const [albumRatings, setAlbumRatings] = useState<Record<string, number>>({});
+  const [allUserRatings, setAllUserRatings] = useState<Record<string, Record<string, number>>>({});
+  const [albumTab, setAlbumTab] = useState<'rate' | 'results'>('rate');
   const [showSetlist, setShowSetlist] = useState(false);
   const [setlistVotes, setSetlistVotes] = useState<Record<string, boolean>>({});
   // Photo gallery
@@ -374,11 +398,15 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
     }
   }, [messages]);
 
-  // Load album ratings, setlist votes, and actual setlists
+  const fetchAllRatings = () => {
+    fetch('/api/album-ratings').then(r => r.ok ? r.json() : {}).then(setAllUserRatings).catch(() => {});
+  };
+
   useEffect(() => {
     setAlbumRatings(getAlbumRatings());
     setSetlistVotes(getSetlistVotes());
     fetch('/api/setlist-recap').then(r => r.ok ? r.json() : {}).then(setActualSetlists).catch(() => {});
+    fetchAllRatings();
   }, []);
 
   const starsUsed = getStarsUsed(albumRatings);
@@ -392,6 +420,11 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
     const updated = { ...albumRatings, [albumId]: newRating };
     saveAlbumRatings(updated);
     setAlbumRatings(updated);
+    fetch('/api/album-ratings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: currentUser, ratings: updated }),
+    }).then(() => fetchAllRatings()).catch(() => {});
   };
 
   const handleSetlistVote = (title: string) => {
@@ -617,61 +650,144 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
         <div className="modal-overlay" onClick={() => setShowAlbumPolls(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Rate the Albums</h3>
+              <h3>Rush Albums</h3>
               <button className="modal-close" onClick={() => setShowAlbumPolls(false)}>✕</button>
             </div>
-            <div className="star-budget-bar">
-              <div className="star-budget-info">
-                <span className="star-budget-label">⭐ Star Budget</span>
-                <span className={`star-budget-count ${starsRemaining === 0 ? 'depleted' : starsRemaining <= 8 ? 'low' : ''}`}>
-                  {starsRemaining} / {STAR_BUDGET} remaining
-                </span>
-              </div>
-              <div className="star-budget-track">
-                <div
-                  className={`star-budget-fill ${starsRemaining === 0 ? 'depleted' : starsRemaining <= 8 ? 'low' : ''}`}
-                  style={{ width: `${(starsUsed / STAR_BUDGET) * 100}%` }}
-                />
-              </div>
-              <p className="star-budget-hint">
-                You have {STAR_BUDGET} stars to spread across {RUSH_ALBUMS.length} albums — choose wisely!
-              </p>
+            <div className="album-tabs">
+              <button className={`album-tab ${albumTab === 'rate' ? 'active' : ''}`} onClick={() => setAlbumTab('rate')}>
+                ⭐ Rate
+              </button>
+              <button className={`album-tab ${albumTab === 'results' ? 'active' : ''}`} onClick={() => { setAlbumTab('results'); fetchAllRatings(); }}>
+                📊 Results
+              </button>
             </div>
-            <div className="modal-body">
-              {RUSH_ALBUMS.map(album => {
-                const rating = albumRatings[album.id] || 0;
-                return (
-                  <div key={album.id} className={`album-row ${rating > 0 ? 'album-rated' : ''}`}>
-                    <img
-                      src={album.cover}
-                      alt={album.name}
-                      className="album-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    <div className="album-info">
-                      <span className="album-name">{album.name}</span>
-                      <span className="album-year">{album.year}</span>
-                    </div>
-                    <div className="star-rating">
-                      {[1, 2, 3, 4, 5].map(star => {
-                        const wouldCost = star - rating;
-                        const canAfford = wouldCost <= starsRemaining || star <= rating;
-                        return (
-                          <button
-                            key={star}
-                            className={`star ${star <= rating ? 'filled' : ''} ${!canAfford ? 'disabled' : ''}`}
-                            onClick={() => handleAlbumRate(album.id, star)}
-                            disabled={!canAfford}
-                          >
-                            ★
-                          </button>
-                        );
-                      })}
-                    </div>
+            {albumTab === 'rate' ? (
+              <>
+                <div className="star-budget-bar">
+                  <div className="star-budget-info">
+                    <span className="star-budget-label">⭐ Star Budget</span>
+                    <span className={`star-budget-count ${starsRemaining === 0 ? 'depleted' : starsRemaining <= 8 ? 'low' : ''}`}>
+                      {starsRemaining} / {STAR_BUDGET} remaining
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="star-budget-track">
+                    <div
+                      className={`star-budget-fill ${starsRemaining === 0 ? 'depleted' : starsRemaining <= 8 ? 'low' : ''}`}
+                      style={{ width: `${(starsUsed / STAR_BUDGET) * 100}%` }}
+                    />
+                  </div>
+                  <p className="star-budget-hint">
+                    You have {STAR_BUDGET} stars to spread across {RUSH_ALBUMS.length} albums — choose wisely!
+                  </p>
+                </div>
+                <div className="modal-body">
+                  {RUSH_ALBUMS.map(album => {
+                    const rating = albumRatings[album.id] || 0;
+                    return (
+                      <div key={album.id} className={`album-row ${rating > 0 ? 'album-rated' : ''}`}>
+                        <img
+                          src={album.cover}
+                          alt={album.name}
+                          className="album-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <div className="album-info">
+                          <span className="album-name">{album.name}</span>
+                          <span className="album-year">{album.year}</span>
+                        </div>
+                        <div className="star-rating">
+                          {[1, 2, 3, 4, 5].map(star => {
+                            const wouldCost = star - rating;
+                            const canAfford = wouldCost <= starsRemaining || star <= rating;
+                            return (
+                              <button
+                                key={star}
+                                className={`star ${star <= rating ? 'filled' : ''} ${!canAfford ? 'disabled' : ''}`}
+                                onClick={() => handleAlbumRate(album.id, star)}
+                                disabled={!canAfford}
+                              >
+                                ★
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="modal-body results-body">
+                {(() => {
+                  const users = Object.entries(allUserRatings);
+                  if (users.length === 0) return <p className="results-empty">No one has rated yet — be the first!</p>;
+
+                  const albumScores: Record<string, { total: number; count: number }> = {};
+                  RUSH_ALBUMS.forEach(a => { albumScores[a.id] = { total: 0, count: 0 }; });
+                  users.forEach(([, ratings]) => {
+                    Object.entries(ratings).forEach(([id, score]) => {
+                      if (albumScores[id]) {
+                        albumScores[id].total += score;
+                        albumScores[id].count += 1;
+                      }
+                    });
+                  });
+
+                  const rankedAlbums = RUSH_ALBUMS
+                    .map(a => ({ ...a, avg: albumScores[a.id].count > 0 ? albumScores[a.id].total / albumScores[a.id].count : 0, total: albumScores[a.id].total }))
+                    .sort((a, b) => b.total - a.total);
+
+                  return (
+                    <>
+                      <div className="results-section">
+                        <h4 className="results-heading">🏆 Group Rankings</h4>
+                        <p className="results-subtitle">{users.length} {users.length === 1 ? 'person has' : 'people have'} voted</p>
+                        {rankedAlbums.filter(a => a.total > 0).map((album, i) => (
+                          <div key={album.id} className="results-album-row">
+                            <span className="results-rank">#{i + 1}</span>
+                            <img src={album.cover} alt={album.name} className="album-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            <div className="album-info">
+                              <span className="album-name">{album.name}</span>
+                              <span className="album-year">{album.year}</span>
+                            </div>
+                            <div className="results-score">
+                              <span className="results-stars">{'★'.repeat(Math.round(album.avg))}</span>
+                              <span className="results-avg">{album.avg.toFixed(1)} avg</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="results-section">
+                        <h4 className="results-heading">👤 Everyone&apos;s Top 5</h4>
+                        {users.map(([name, ratings]) => {
+                          const top5 = Object.entries(ratings)
+                            .filter(([, s]) => s > 0)
+                            .sort(([, a], [, b]) => b - a)
+                            .slice(0, 5);
+                          if (top5.length === 0) return null;
+                          return (
+                            <div key={name} className="user-top5">
+                              <h5 className="user-top5-name">{name.charAt(0).toUpperCase() + name.slice(1)}</h5>
+                              {top5.map(([albumId, score], j) => {
+                                const album = RUSH_ALBUMS.find(a => a.id === albumId);
+                                return (
+                                  <div key={albumId} className="user-top5-row">
+                                    <span className="results-rank">#{j + 1}</span>
+                                    <span className="user-top5-album">{album?.name || albumId}</span>
+                                    <span className="user-top5-stars">{'★'.repeat(score)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1058,18 +1174,16 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
 // ===== MAIN PAGE =====
 export default function Home() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState('');
   const [checking, setChecking] = useState(true);
 
-  // Check if already authenticated (cookie exists)
   useEffect(() => {
-    fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [] }),
-    })
-      .then((res) => {
-        if (res.ok) {
+    fetch('/api/auth')
+      .then(r => r.json())
+      .then(data => {
+        if (data.authenticated && data.user) {
           setAuthenticated(true);
+          setCurrentUser(data.user);
         }
       })
       .catch(() => {})
@@ -1095,9 +1209,9 @@ export default function Home() {
     <>
       <div className="starfield" />
       {authenticated ? (
-        <ChatPage onLogout={() => setAuthenticated(false)} />
+        <ChatPage onLogout={() => { setAuthenticated(false); setCurrentUser(''); }} currentUser={currentUser} />
       ) : (
-        <LoginPage onLogin={() => setAuthenticated(true)} />
+        <LoginPage onLogin={(name) => { setAuthenticated(true); setCurrentUser(name); }} />
       )}
     </>
   );
