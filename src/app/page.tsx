@@ -150,8 +150,8 @@ const DINNER_RECS = [
 ];
 
 const TRIP_MEMBERS = [
-  'Jason', 'Mitch', 'Tom', 'Dawn', 'Mark',
-  'Matt R', 'Sam', 'Stew', 'Kirk', 'Matt E', 'Dave',
+  'Stew', 'Mitch', 'Tom', 'Dawn', 'Mark',
+  'Matt R', 'Sam', 'Kirk', 'Matt E', 'Dave',
 ];
 
 // ===== COUNTDOWN TIMER LOGIC =====
