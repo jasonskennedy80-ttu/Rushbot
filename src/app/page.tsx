@@ -817,7 +817,7 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
                 </select>
                 <label className="photo-upload-btn">
                   {uploading ? 'Uploading...' : '+ Add Photo'}
-                  <input type="file" accept="image/*" capture="environment" hidden onChange={handlePhotoUpload} disabled={uploading} />
+                  <input type="file" accept="image/*" hidden onChange={handlePhotoUpload} disabled={uploading} />
                 </label>
               </div>
             </div>
