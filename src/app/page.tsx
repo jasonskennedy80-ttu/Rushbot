@@ -84,6 +84,7 @@ const DINNER_RECS = [
     distance: '0.3 mi',
     rating: '4.5',
     reviews: '2.4k',
+    url: 'https://www.palmillarestaurant.com',
     note: 'Premium tequilas, heated patio, steps from the pier. Has vegan & GF options. Handles large parties — contact their Events Manager.',
   },
   {
@@ -93,6 +94,7 @@ const DINNER_RECS = [
     distance: '0.5 mi',
     rating: '4.8',
     reviews: '356',
+    url: 'https://www.barshawine.com',
     note: 'Tunisian-inspired small plates. Tons of vegan options (cauliflower, chickpeas, shakshuka). Great wine list from their own wine shop. Chill vibe.',
   },
   {
@@ -102,6 +104,7 @@ const DINNER_RECS = [
     distance: '0.1 mi',
     rating: '4.6',
     reviews: '571',
+    url: 'https://www.rylarestaurant.com',
     note: 'Michelin-recognized. Inventive seafood & cocktails. Has vegan & GF options. Lively coastal atmosphere, splashy spot.',
   },
   {
@@ -111,6 +114,7 @@ const DINNER_RECS = [
     distance: '0.3 mi',
     rating: '4.4',
     reviews: '756',
+    url: 'https://www.hookandplow.com',
     note: 'Farm-to-table on Pier Ave. Lots of vegan & GF options (kale quinoa salad, crispy tofu). Craft beers on tap.',
   },
   {
@@ -120,6 +124,7 @@ const DINNER_RECS = [
     distance: '3.2 mi',
     rating: '4.1',
     reviews: '1.5k',
+    url: 'https://www.truefoodkitchen.com',
     note: 'In El Segundo. Menu clearly marked for vegan & GF. Built for dietary needs — Mitch-approved. Good for groups.',
   },
   {
@@ -129,6 +134,7 @@ const DINNER_RECS = [
     distance: '1.2 mi',
     rating: '4.5',
     reviews: '2.8k',
+    url: 'https://www.thestrandhousemb.com',
     note: 'Best view in Manhattan Beach. Famous craft cocktails & wine program. Upscale splurge option. $75/person deposit for reservations.',
   },
   {
@@ -138,6 +144,7 @@ const DINNER_RECS = [
     distance: '0.4 mi',
     rating: '4.5',
     reviews: '497',
+    url: 'https://www.bottleinn.com',
     note: 'Est. 1974. Cozy, romantic. Wine cellar fits up to 20 guests — perfect for the group. Italian classics, limited vegan but GF pasta available.',
   },
 ];
@@ -769,6 +776,7 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
                     <span className="dinner-rec-rating">⭐ {rec.rating} ({rec.reviews})</span>
                   </div>
                   <p className="dinner-rec-note">{rec.note}</p>
+                  <a href={rec.url} target="_blank" rel="noopener noreferrer" className="dinner-rec-link">🔗 View Menu & Website</a>
                 </div>
               ))}
             </div>

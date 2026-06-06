@@ -1238,6 +1238,20 @@ body {
   line-height: 1.5;
 }
 
+.dinner-rec-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #d4a843;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dinner-rec-link:hover {
+  color: #e8c45a;
+  text-decoration: underline;
+}
+
 .event-link-btn {
   display: inline-block;
   margin-left: 8px;
