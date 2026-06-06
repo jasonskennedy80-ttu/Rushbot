@@ -189,7 +189,12 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
 
 // ===== CHAT COMPONENT =====
 function ChatPage({ onLogout }: { onLogout: () => void }) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      return JSON.parse(localStorage.getItem('rushbot-chat-history') || '[]');
+    } catch { return []; }
+  });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [countdowns, setCountdowns] = useState<(string | null)[]>([]);
@@ -210,6 +215,13 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
   const [setlistDraft, setSetlistDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Persist chat history
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('rushbot-chat-history', JSON.stringify(messages));
+    }
+  }, [messages]);
 
   // Load album ratings, setlist votes, and actual setlists
   useEffect(() => {
@@ -280,6 +292,11 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
   const openRecap = (showKey: string) => {
     setShowRecap(showKey);
     setSetlistDraft(actualSetlists[showKey]?.join('\n') || '');
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    localStorage.removeItem('rushbot-chat-history');
   };
 
   // Countdown timer
@@ -720,6 +737,11 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
       {/* Input */}
       <div className="chat-input-area">
         <div className="chat-input-wrapper">
+          {messages.length > 0 && (
+            <button className="clear-chat-button" onClick={clearChat} title="New conversation">
+              +
+            </button>
+          )}
           <textarea
             ref={inputRef}
             className="chat-input"
