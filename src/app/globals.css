@@ -1228,12 +1228,19 @@ body {
   .chat-header {
     padding: 10px 16px;
     padding-top: max(10px, env(safe-area-inset-top));
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .chat-header-avatar {
     width: 34px;
     height: 34px;
     font-size: 18px;
+  }
+
+  .chat-header-info {
+    flex: 1;
+    min-width: 0;
   }
 
   .chat-header-info h2 {
@@ -1262,9 +1269,13 @@ body {
     display: none;
   }
 
+  .btn-label {
+    display: none;
+  }
+
   .header-action-button {
-    font-size: 11px;
-    padding: 4px 8px;
+    font-size: 14px;
+    padding: 4px 6px;
   }
 
   .modal-content {

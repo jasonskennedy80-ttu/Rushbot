@@ -420,24 +420,24 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
           onClick={() => setShowAlbumPolls(true)}
           title="Rate Rush Albums"
         >
-          ⭐ Rate Albums
+          ⭐ <span className="btn-label">Rate Albums</span>
         </button>
         <button
           className="header-action-button"
           onClick={() => setShowSetlist(true)}
           title="Setlist Predictions"
         >
-          🎵 Setlist
+          🎵 <span className="btn-label">Setlist</span>
         </button>
         <button
           className="header-action-button"
           onClick={() => { setShowPhotos(true); fetchPhotos(); }}
           title="Trip Photos"
         >
-          📸 Photos
+          📸 <span className="btn-label">Photos</span>
         </button>
         <button className="logout-button" onClick={handleLogout} title="Back to login">
-          ← Exit
+          ← <span className="btn-label">Exit</span>
         </button>
       </div>
 
