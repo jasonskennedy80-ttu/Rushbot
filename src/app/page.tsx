@@ -5,6 +5,77 @@ import { RUSH_QUOTES } from '@/lib/rush-quotes';
 import { SETLIST_SONGS, LIKELIHOOD_LABELS } from '@/lib/setlist-data';
 import type { SetlistSong } from '@/lib/setlist-data';
 
+// ===== TRIP ITINERARY =====
+const ITINERARY: Array<{
+  date: string; label: string; highlight?: boolean;
+  events: Array<{ time: string; desc: string; icon: string; highlight?: boolean }>;
+}> = [
+  {
+    date: 'Fri, June 6',
+    label: 'Arrival Day',
+    events: [
+      { time: '2:02 PM', desc: 'Jesse arrives — AA1213 to LAX', icon: '✈️' },
+      { time: '3:00 PM', desc: 'Stew arrives — WN 3161 DAL→LAX', icon: '✈️' },
+      { time: 'Afternoon', desc: 'Check in at 99 Hermosa Ave, Hermosa Beach', icon: '🏠' },
+      { time: 'Evening', desc: 'Mitch arrives (late)', icon: '🚗' },
+      { time: 'TBD', desc: 'Group dinner — first night together!', icon: '🍕' },
+    ],
+  },
+  {
+    date: 'Sat, June 7',
+    label: 'SHOW 1',
+    highlight: true,
+    events: [
+      { time: 'Daytime', desc: 'Explore Hermosa Beach / free time', icon: '🏖️' },
+      { time: 'TBD', desc: 'Pre-show meetup & dinner', icon: '🍽️' },
+      { time: '8:00 PM', desc: 'RUSH — Show 1!', icon: '🎸', highlight: true },
+      { time: 'After', desc: 'Post-show celebration', icon: '🤘' },
+    ],
+  },
+  {
+    date: 'Sun, June 8',
+    label: 'Rest Day',
+    events: [
+      { time: 'All Day', desc: 'Recovery day — beach, explore LA, relax', icon: '😎' },
+    ],
+  },
+  {
+    date: 'Mon, June 9',
+    label: 'SHOW 2',
+    highlight: true,
+    events: [
+      { time: 'Daytime', desc: 'Free time / sightseeing', icon: '🌴' },
+      { time: 'TBD', desc: 'Pre-show meetup & dinner', icon: '🍽️' },
+      { time: '8:00 PM', desc: 'RUSH — Show 2!', icon: '🎸', highlight: true },
+      { time: 'After', desc: 'Post-show celebration', icon: '🤘' },
+    ],
+  },
+  {
+    date: 'Tue, June 10',
+    label: 'Departure Day',
+    events: [
+      { time: 'Morning', desc: 'Check out — 99 Hermosa Ave', icon: '🏠' },
+      { time: '11:00 AM', desc: 'Jesse departs — AA1159 from LAX', icon: '✈️' },
+      { time: '4:10 PM', desc: 'Stew departs — WN 716 LAX→DAL', icon: '✈️' },
+      { time: 'TBD', desc: 'Mitch, Mark, others depart', icon: '👋' },
+    ],
+  },
+  {
+    date: 'Fri, June 13',
+    label: 'SHOW 3',
+    highlight: true,
+    events: [
+      { time: '8:00 PM', desc: 'RUSH — Show 3! (Tom & Dawn, Mitch)', icon: '🎸', highlight: true },
+    ],
+  },
+];
+
+const TICKET_INFO = [
+  { show: 'June 7 (Show 1)', holders: ['Mitch (8 tickets)', 'Tom & Dawn (2 tickets)'] },
+  { show: 'June 9 (Show 2)', holders: ['Mitch (4 tickets)', 'Mark (3 tickets)'] },
+  { show: 'June 13 (Show 3)', holders: ['Tom & Dawn (2 tickets)', 'Mitch (3 tickets via Stew)'] },
+];
+
 // ===== COUNTDOWN TIMER LOGIC =====
 const SHOW_DATES = [
   { label: 'Show 1 — June 7', date: new Date('2026-06-07T20:00:00-07:00') },
@@ -199,6 +270,8 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [countdowns, setCountdowns] = useState<(string | null)[]>([]);
   const [showAlbumPolls, setShowAlbumPolls] = useState(false);
+  const [showItinerary, setShowItinerary] = useState(false);
+  const [itineraryTab, setItineraryTab] = useState<'schedule' | 'tickets'>('schedule');
   const [albumRatings, setAlbumRatings] = useState<Record<string, number>>({});
   const [showSetlist, setShowSetlist] = useState(false);
   const [setlistVotes, setSetlistVotes] = useState<Record<string, boolean>>({});
@@ -453,6 +526,13 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
         >
           📸 <span className="btn-label">Photos</span>
         </button>
+        <button
+          className="header-action-button"
+          onClick={() => setShowItinerary(true)}
+          title="Trip Schedule"
+        >
+          📅 <span className="btn-label">Schedule</span>
+        </button>
         <button className="logout-button" onClick={handleLogout} title="Back to login">
           ← <span className="btn-label">Exit</span>
         </button>
@@ -531,6 +611,71 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Itinerary Modal */}
+      {showItinerary && (
+        <div className="modal-overlay" onClick={() => setShowItinerary(false)}>
+          <div className="modal-content itinerary-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Trip Schedule</h3>
+              <button className="modal-close" onClick={() => setShowItinerary(false)}>✕</button>
+            </div>
+            <div className="itinerary-tabs">
+              <button
+                className={`itinerary-tab ${itineraryTab === 'schedule' ? 'active' : ''}`}
+                onClick={() => setItineraryTab('schedule')}
+              >
+                📅 Schedule
+              </button>
+              <button
+                className={`itinerary-tab ${itineraryTab === 'tickets' ? 'active' : ''}`}
+                onClick={() => setItineraryTab('tickets')}
+              >
+                🎟️ Tickets
+              </button>
+            </div>
+            <div className="modal-body">
+              {itineraryTab === 'schedule' ? (
+                <div className="itinerary-timeline">
+                  {ITINERARY.map((day, di) => (
+                    <div key={di} className={`itinerary-day ${day.highlight ? 'show-day' : ''}`}>
+                      <div className="itinerary-day-header">
+                        <span className="itinerary-date">{day.date}</span>
+                        <span className={`itinerary-day-label ${day.highlight ? 'show-label' : ''}`}>{day.label}</span>
+                      </div>
+                      <div className="itinerary-events">
+                        {day.events.map((ev, ei) => (
+                          <div key={ei} className={`itinerary-event ${ev.highlight ? 'event-highlight' : ''}`}>
+                            <span className="event-icon">{ev.icon}</span>
+                            <span className="event-time">{ev.time}</span>
+                            <span className="event-desc">{ev.desc}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="ticket-info">
+                  {TICKET_INFO.map((show, si) => (
+                    <div key={si} className="ticket-show">
+                      <h4 className="ticket-show-title">{show.show}</h4>
+                      <ul className="ticket-holders">
+                        {show.holders.map((h, hi) => (
+                          <li key={hi}>{h}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  <div className="ticket-note">
+                    <p>Talk to your ticket holder if you need details!</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

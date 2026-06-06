@@ -968,6 +968,185 @@ body {
   40%, 80% { transform: translateX(6px); }
 }
 
+/* ===== ITINERARY ===== */
+.itinerary-modal {
+  max-width: 520px;
+}
+
+.itinerary-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.itinerary-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.itinerary-tab.active {
+  color: var(--rush-gold);
+  border-bottom-color: var(--rush-gold);
+}
+
+.itinerary-tab:hover {
+  color: var(--text-primary);
+}
+
+.itinerary-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.itinerary-day {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.itinerary-day.show-day {
+  border-color: rgba(196, 18, 48, 0.3);
+  box-shadow: 0 0 16px rgba(196, 18, 48, 0.1);
+}
+
+.itinerary-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.itinerary-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.itinerary-day-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.itinerary-day-label.show-label {
+  background: rgba(196, 18, 48, 0.15);
+  color: var(--rush-red-light);
+}
+
+.itinerary-events {
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.itinerary-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.itinerary-event.event-highlight {
+  color: var(--rush-gold);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.event-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.event-time {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.event-highlight .event-time {
+  color: var(--rush-red-light);
+}
+
+.event-desc {
+  flex: 1;
+}
+
+/* ===== TICKET INFO ===== */
+.ticket-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ticket-show {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.ticket-show-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--rush-gold);
+  margin-bottom: 8px;
+}
+
+.ticket-holders {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ticket-holders li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ticket-holders li:last-child {
+  border-bottom: none;
+}
+
+.ticket-note {
+  text-align: center;
+  padding: 12px;
+  background: rgba(212, 168, 67, 0.08);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(212, 168, 67, 0.15);
+}
+
+.ticket-note p {
+  font-size: 13px;
+  color: var(--rush-gold);
+  font-weight: 600;
+}
+
 /* ===== PHOTO GALLERY ===== */
 .photo-modal {
   max-width: 600px;
