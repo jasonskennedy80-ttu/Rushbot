@@ -499,43 +499,31 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
 
       {/* Header */}
       <div className="chat-header">
-        <div className="chat-header-avatar">🎸</div>
-        <div className="chat-header-info">
-          <h2>Alex Lifeson</h2>
-          <p>RushBot • LA Trip June 2026</p>
+        <div className="chat-header-top">
+          <div className="chat-header-avatar">🎸</div>
+          <div className="chat-header-info">
+            <h2>Alex Lifeson</h2>
+            <p>RushBot • LA Trip June 2026</p>
+          </div>
+          <div className="chat-header-badge">🌟 Rush</div>
+          <button className="logout-button" onClick={handleLogout} title="Back to login">
+            ← <span className="btn-label">Exit</span>
+          </button>
         </div>
-        <div className="chat-header-badge">🌟 Rush</div>
-        <button
-          className="header-action-button"
-          onClick={() => setShowAlbumPolls(true)}
-          title="Rate Rush Albums"
-        >
-          ⭐ <span className="btn-label">Rate Albums</span>
-        </button>
-        <button
-          className="header-action-button"
-          onClick={() => setShowSetlist(true)}
-          title="Setlist Predictions"
-        >
-          🎵 <span className="btn-label">Setlist</span>
-        </button>
-        <button
-          className="header-action-button"
-          onClick={() => { setShowPhotos(true); fetchPhotos(); }}
-          title="Trip Photos"
-        >
-          📸 <span className="btn-label">Photos</span>
-        </button>
-        <button
-          className="header-action-button"
-          onClick={() => setShowItinerary(true)}
-          title="Trip Schedule"
-        >
-          📅 <span className="btn-label">Schedule</span>
-        </button>
-        <button className="logout-button" onClick={handleLogout} title="Back to login">
-          ← <span className="btn-label">Exit</span>
-        </button>
+        <div className="header-actions">
+          <button className="header-action-button" onClick={() => setShowAlbumPolls(true)} title="Rate Rush Albums">
+            ⭐ <span className="btn-label">Albums</span>
+          </button>
+          <button className="header-action-button" onClick={() => setShowSetlist(true)} title="Setlist Predictions">
+            🎵 <span className="btn-label">Setlist</span>
+          </button>
+          <button className="header-action-button" onClick={() => { setShowPhotos(true); fetchPhotos(); }} title="Trip Photos">
+            📸 <span className="btn-label">Photos</span>
+          </button>
+          <button className="header-action-button" onClick={() => setShowItinerary(true)} title="Trip Schedule">
+            📅 <span className="btn-label">Schedule</span>
+          </button>
+        </div>
       </div>
 
       {/* Album Rating Modal */}
