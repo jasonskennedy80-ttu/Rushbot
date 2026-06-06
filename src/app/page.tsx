@@ -8,7 +8,7 @@ import type { SetlistSong } from '@/lib/setlist-data';
 // ===== TRIP ITINERARY =====
 const ITINERARY: Array<{
   date: string; label: string; highlight?: boolean;
-  events: Array<{ time: string; desc: string; icon: string; highlight?: boolean }>;
+  events: Array<{ time: string; desc: string; icon: string; highlight?: boolean; link?: string }>;
 }> = [
   {
     date: 'Sat, June 6',
@@ -18,7 +18,7 @@ const ITINERARY: Array<{
       { time: '3:00 PM', desc: 'Stew, Mark & Matt arrive — WN 3161 DAL→LAX', icon: '✈️' },
       { time: 'Afternoon', desc: 'Check in at 99 Hermosa Ave, Hermosa Beach', icon: '🏠' },
       { time: 'Evening', desc: 'Mitch arrives (late)', icon: '🚗' },
-      { time: 'TBD', desc: 'Group dinner — first night together!', icon: '🍕' },
+      { time: 'TBD', desc: 'Group dinner — first night together!', icon: '🍕', link: 'dinner-recs' },
     ],
   },
   {
@@ -74,6 +74,72 @@ const TICKET_INFO = [
   { show: 'June 7 (Show 1)', holders: ['Mitch (8 tickets)', 'Tom & Dawn (2 tickets)'] },
   { show: 'June 9 (Show 2)', holders: ['Mitch (4 tickets)', 'Mark (3 tickets)'] },
   { show: 'June 13 (Show 3)', holders: ['Tom & Dawn (2 tickets)', 'Mitch (3 tickets via Stew)'] },
+];
+
+const DINNER_RECS = [
+  {
+    name: 'Palmilla Cocina y Tequila',
+    type: 'Upscale Mexican',
+    price: '$$$',
+    distance: '0.3 mi',
+    rating: '4.5',
+    reviews: '2.4k',
+    note: 'Premium tequilas, heated patio, steps from the pier. Has vegan & GF options. Handles large parties — contact their Events Manager.',
+  },
+  {
+    name: 'Barsha',
+    type: 'North African / Mediterranean',
+    price: '$$',
+    distance: '0.5 mi',
+    rating: '4.8',
+    reviews: '356',
+    note: 'Tunisian-inspired small plates. Tons of vegan options (cauliflower, chickpeas, shakshuka). Great wine list from their own wine shop. Chill vibe.',
+  },
+  {
+    name: 'RYLA',
+    type: 'Asian Fusion / Seafood',
+    price: '$$$',
+    distance: '0.1 mi',
+    rating: '4.6',
+    reviews: '571',
+    note: 'Michelin-recognized. Inventive seafood & cocktails. Has vegan & GF options. Lively coastal atmosphere, splashy spot.',
+  },
+  {
+    name: 'The Hook & Plow',
+    type: 'Farm-to-Table American',
+    price: '$$',
+    distance: '0.3 mi',
+    rating: '4.4',
+    reviews: '756',
+    note: 'Farm-to-table on Pier Ave. Lots of vegan & GF options (kale quinoa salad, crispy tofu). Craft beers on tap.',
+  },
+  {
+    name: 'True Food Kitchen',
+    type: 'Health-Conscious American',
+    price: '$$',
+    distance: '3.2 mi',
+    rating: '4.1',
+    reviews: '1.5k',
+    note: 'In El Segundo. Menu clearly marked for vegan & GF. Built for dietary needs — Mitch-approved. Good for groups.',
+  },
+  {
+    name: 'The Strand House',
+    type: 'Upscale American / Seafood',
+    price: '$$$$',
+    distance: '1.2 mi',
+    rating: '4.5',
+    reviews: '2.8k',
+    note: 'Best view in Manhattan Beach. Famous craft cocktails & wine program. Upscale splurge option. $75/person deposit for reservations.',
+  },
+  {
+    name: 'Bottle Inn',
+    type: 'Classic Italian',
+    price: '$$$',
+    distance: '0.4 mi',
+    rating: '4.5',
+    reviews: '497',
+    note: 'Est. 1974. Cozy, romantic. Wine cellar fits up to 20 guests — perfect for the group. Italian classics, limited vegan but GF pasta available.',
+  },
 ];
 
 // ===== COUNTDOWN TIMER LOGIC =====
@@ -272,6 +338,7 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
   const [showAlbumPolls, setShowAlbumPolls] = useState(false);
   const [showItinerary, setShowItinerary] = useState(false);
   const [itineraryTab, setItineraryTab] = useState<'schedule' | 'tickets'>('schedule');
+  const [showDinnerRecs, setShowDinnerRecs] = useState(false);
   const [albumRatings, setAlbumRatings] = useState<Record<string, number>>({});
   const [showSetlist, setShowSetlist] = useState(false);
   const [setlistVotes, setSetlistVotes] = useState<Record<string, boolean>>({});
@@ -640,7 +707,14 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
                           <div key={ei} className={`itinerary-event ${ev.highlight ? 'event-highlight' : ''}`}>
                             <span className="event-icon">{ev.icon}</span>
                             <span className="event-time">{ev.time}</span>
-                            <span className="event-desc">{ev.desc}</span>
+                            <span className="event-desc">
+                              {ev.desc}
+                              {ev.link === 'dinner-recs' && (
+                                <button className="event-link-btn" onClick={() => setShowDinnerRecs(true)}>
+                                  🍽️ Recommendations
+                                </button>
+                              )}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -664,6 +738,39 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dinner Recommendations Modal */}
+      {showDinnerRecs && (
+        <div className="modal-overlay" onClick={() => setShowDinnerRecs(false)}>
+          <div className="modal-content dinner-recs-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Dinner Spots</h3>
+              <button className="modal-close" onClick={() => setShowDinnerRecs(false)}>✕</button>
+            </div>
+            <div className="dinner-recs-note">
+              Group of 10 • Vegan options for Mitch • Gluten-free friendly • Within 10 mi of house
+            </div>
+            <div className="modal-body">
+              {DINNER_RECS.map((rec, i) => (
+                <div key={i} className="dinner-rec-card">
+                  <div className="dinner-rec-header">
+                    <span className="dinner-rec-name">{rec.name}</span>
+                    <span className="dinner-rec-price">{rec.price}</span>
+                  </div>
+                  <div className="dinner-rec-meta">
+                    <span className="dinner-rec-type">{rec.type}</span>
+                    <span className="dinner-rec-dot">•</span>
+                    <span className="dinner-rec-distance">{rec.distance}</span>
+                    <span className="dinner-rec-dot">•</span>
+                    <span className="dinner-rec-rating">⭐ {rec.rating} ({rec.reviews})</span>
+                  </div>
+                  <p className="dinner-rec-note">{rec.note}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

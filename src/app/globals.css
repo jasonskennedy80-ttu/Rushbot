@@ -1170,6 +1170,94 @@ body {
   font-weight: 600;
 }
 
+/* ===== DINNER RECOMMENDATIONS ===== */
+.dinner-recs-modal {
+  max-width: 520px;
+}
+
+.dinner-recs-note {
+  padding: 10px 24px;
+  font-size: 12px;
+  color: var(--rush-gold);
+  background: rgba(212, 168, 67, 0.06);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.dinner-rec-card {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dinner-rec-card:last-child {
+  border-bottom: none;
+}
+
+.dinner-rec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.dinner-rec-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dinner-rec-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rush-gold);
+  flex-shrink: 0;
+}
+
+.dinner-rec-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.dinner-rec-dot {
+  color: var(--text-muted);
+  opacity: 0.4;
+}
+
+.dinner-rec-rating {
+  color: var(--text-secondary);
+}
+
+.dinner-rec-note {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.event-link-btn {
+  display: inline-block;
+  margin-left: 8px;
+  background: rgba(212, 168, 67, 0.12);
+  border: 1px solid rgba(212, 168, 67, 0.25);
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rush-gold);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.2s;
+}
+
+.event-link-btn:hover {
+  background: rgba(212, 168, 67, 0.2);
+  border-color: var(--rush-gold);
+}
+
 /* ===== PHOTO GALLERY ===== */
 .photo-modal {
   max-width: 600px;
