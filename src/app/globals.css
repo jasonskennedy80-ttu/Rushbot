@@ -813,17 +813,88 @@ body {
 }
 
 /* ===== ALBUM POLLS ===== */
+.star-budget-bar {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(212, 168, 67, 0.04);
+}
+
+.star-budget-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.star-budget-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rush-gold);
+}
+
+.star-budget-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+}
+
+.star-budget-count.low {
+  color: #e8a020;
+}
+
+.star-budget-count.depleted {
+  color: var(--rush-red);
+}
+
+.star-budget-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.star-budget-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--rush-gold), #e8c45a);
+  border-radius: 4px;
+  transition: width 0.3s ease, background 0.3s;
+}
+
+.star-budget-fill.low {
+  background: linear-gradient(90deg, #e8a020, #d4a843);
+}
+
+.star-budget-fill.depleted {
+  background: linear-gradient(90deg, var(--rush-red), #a00e28);
+}
+
+.star-budget-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  text-align: center;
+  font-style: italic;
+}
+
 .album-row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+}
+
+.album-rated {
+  background: rgba(212, 168, 67, 0.04);
+  border-radius: 6px;
+  padding: 10px 8px;
 }
 
 .album-cover {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
@@ -867,12 +938,17 @@ body {
   transition: color 0.15s, transform 0.15s;
 }
 
-.star:hover {
+.star:hover:not(.disabled) {
   transform: scale(1.2);
 }
 
 .star.filled {
   color: var(--rush-gold);
+}
+
+.star.disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
 }
 
 /* ===== SETLIST PREDICTIONS ===== */

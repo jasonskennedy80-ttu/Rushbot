@@ -189,6 +189,8 @@ const RUSH_ALBUMS = [
   { id: 'clockwork-angels', name: 'Clockwork Angels', year: 2012, cover: 'https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Rush_Clockwork_Angels_artwork.png/250px-Rush_Clockwork_Angels_artwork.png' },
 ];
 
+const STAR_BUDGET = 40;
+
 function getAlbumRatings(): Record<string, number> {
   if (typeof window === 'undefined') return {};
   try {
@@ -196,10 +198,12 @@ function getAlbumRatings(): Record<string, number> {
   } catch { return {}; }
 }
 
-function saveAlbumRating(albumId: string, rating: number) {
-  const ratings = getAlbumRatings();
-  ratings[albumId] = rating;
+function saveAlbumRatings(ratings: Record<string, number>) {
   localStorage.setItem('rushbot-album-ratings', JSON.stringify(ratings));
+}
+
+function getStarsUsed(ratings: Record<string, number>): number {
+  return Object.values(ratings).reduce((sum, r) => sum + r, 0);
 }
 
 function getSetlistVotes(): Record<string, boolean> {
@@ -377,9 +381,17 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
     fetch('/api/setlist-recap').then(r => r.ok ? r.json() : {}).then(setActualSetlists).catch(() => {});
   }, []);
 
+  const starsUsed = getStarsUsed(albumRatings);
+  const starsRemaining = STAR_BUDGET - starsUsed;
+
   const handleAlbumRate = (albumId: string, rating: number) => {
-    saveAlbumRating(albumId, rating);
-    setAlbumRatings(prev => ({ ...prev, [albumId]: rating }));
+    const currentRating = albumRatings[albumId] || 0;
+    const newRating = rating === currentRating ? 0 : rating;
+    const cost = newRating - currentRating;
+    if (cost > starsRemaining) return;
+    const updated = { ...albumRatings, [albumId]: newRating };
+    saveAlbumRatings(updated);
+    setAlbumRatings(updated);
   };
 
   const handleSetlistVote = (title: string) => {
@@ -608,32 +620,57 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
               <h3>Rate the Albums</h3>
               <button className="modal-close" onClick={() => setShowAlbumPolls(false)}>✕</button>
             </div>
+            <div className="star-budget-bar">
+              <div className="star-budget-info">
+                <span className="star-budget-label">⭐ Star Budget</span>
+                <span className={`star-budget-count ${starsRemaining === 0 ? 'depleted' : starsRemaining <= 8 ? 'low' : ''}`}>
+                  {starsRemaining} / {STAR_BUDGET} remaining
+                </span>
+              </div>
+              <div className="star-budget-track">
+                <div
+                  className={`star-budget-fill ${starsRemaining === 0 ? 'depleted' : starsRemaining <= 8 ? 'low' : ''}`}
+                  style={{ width: `${(starsUsed / STAR_BUDGET) * 100}%` }}
+                />
+              </div>
+              <p className="star-budget-hint">
+                You have {STAR_BUDGET} stars to spread across {RUSH_ALBUMS.length} albums — choose wisely!
+              </p>
+            </div>
             <div className="modal-body">
-              {RUSH_ALBUMS.map(album => (
-                <div key={album.id} className="album-row">
-                  <img
-                    src={album.cover}
-                    alt={album.name}
-                    className="album-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <div className="album-info">
-                    <span className="album-name">{album.name}</span>
-                    <span className="album-year">{album.year}</span>
+              {RUSH_ALBUMS.map(album => {
+                const rating = albumRatings[album.id] || 0;
+                return (
+                  <div key={album.id} className={`album-row ${rating > 0 ? 'album-rated' : ''}`}>
+                    <img
+                      src={album.cover}
+                      alt={album.name}
+                      className="album-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    <div className="album-info">
+                      <span className="album-name">{album.name}</span>
+                      <span className="album-year">{album.year}</span>
+                    </div>
+                    <div className="star-rating">
+                      {[1, 2, 3, 4, 5].map(star => {
+                        const wouldCost = star - rating;
+                        const canAfford = wouldCost <= starsRemaining || star <= rating;
+                        return (
+                          <button
+                            key={star}
+                            className={`star ${star <= rating ? 'filled' : ''} ${!canAfford ? 'disabled' : ''}`}
+                            onClick={() => handleAlbumRate(album.id, star)}
+                            disabled={!canAfford}
+                          >
+                            ★
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="star-rating">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <button
-                        key={star}
-                        className={`star ${star <= (albumRatings[album.id] || 0) ? 'filled' : ''}`}
-                        onClick={() => handleAlbumRate(album.id, star)}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
