@@ -11,7 +11,7 @@ const ITINERARY: Array<{
   events: Array<{ time: string; desc: string; icon: string; highlight?: boolean }>;
 }> = [
   {
-    date: 'Fri, June 6',
+    date: 'Sat, June 6',
     label: 'Arrival Day',
     events: [
       { time: '2:02 PM', desc: 'Jesse arrives — AA1213 to LAX', icon: '✈️' },
@@ -22,7 +22,7 @@ const ITINERARY: Array<{
     ],
   },
   {
-    date: 'Sat, June 7',
+    date: 'Sun, June 7',
     label: 'SHOW 1',
     highlight: true,
     events: [
@@ -33,14 +33,14 @@ const ITINERARY: Array<{
     ],
   },
   {
-    date: 'Sun, June 8',
+    date: 'Mon, June 8',
     label: 'Rest Day',
     events: [
       { time: 'All Day', desc: 'Recovery day — beach, explore LA, relax', icon: '😎' },
     ],
   },
   {
-    date: 'Mon, June 9',
+    date: 'Tue, June 9',
     label: 'SHOW 2',
     highlight: true,
     events: [
@@ -51,7 +51,7 @@ const ITINERARY: Array<{
     ],
   },
   {
-    date: 'Tue, June 10',
+    date: 'Wed, June 10',
     label: 'Departure Day',
     events: [
       { time: 'Morning', desc: 'Check out — 99 Hermosa Ave', icon: '🏠' },
@@ -61,7 +61,7 @@ const ITINERARY: Array<{
     ],
   },
   {
-    date: 'Fri, June 13',
+    date: 'Sat, June 13',
     label: 'SHOW 3',
     highlight: true,
     events: [
