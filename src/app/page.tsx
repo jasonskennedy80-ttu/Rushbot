@@ -197,13 +197,25 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
   const [albumRatings, setAlbumRatings] = useState<Record<string, number>>({});
   const [showSetlist, setShowSetlist] = useState(false);
   const [setlistVotes, setSetlistVotes] = useState<Record<string, boolean>>({});
+  // Photo gallery
+  const [showPhotos, setShowPhotos] = useState(false);
+  const [photos, setPhotos] = useState<Array<{ url: string; show: string; uploadedAt: string; filename: string }>>([]);
+  const [photoFilter, setPhotoFilter] = useState('all');
+  const [uploading, setUploading] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [uploadShow, setUploadShow] = useState('general');
+  // Post-show recap
+  const [actualSetlists, setActualSetlists] = useState<Record<string, string[]>>({});
+  const [showRecap, setShowRecap] = useState<string | null>(null);
+  const [setlistDraft, setSetlistDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load album ratings and setlist votes from localStorage
+  // Load album ratings, setlist votes, and actual setlists
   useEffect(() => {
     setAlbumRatings(getAlbumRatings());
     setSetlistVotes(getSetlistVotes());
+    fetch('/api/setlist-recap').then(r => r.ok ? r.json() : {}).then(setActualSetlists).catch(() => {});
   }, []);
 
   const handleAlbumRate = (albumId: string, rating: number) => {
@@ -214,6 +226,60 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
   const handleSetlistVote = (title: string) => {
     const updated = toggleSetlistVote(title);
     setSetlistVotes(updated);
+  };
+
+  // Photo handlers
+  const fetchPhotos = async (filter?: string) => {
+    const url = filter && filter !== 'all' ? `/api/photos?show=${filter}` : '/api/photos';
+    const res = await fetch(url);
+    if (res.ok) setPhotos(await res.json());
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('show', uploadShow);
+      const res = await fetch('/api/photos', { method: 'POST', body: formData });
+      if (res.ok) {
+        await fetchPhotos(photoFilter);
+      }
+    } catch {
+      // upload failed silently
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const openPhotosForShow = (showKey: string) => {
+    setPhotoFilter(showKey);
+    setShowPhotos(true);
+    fetchPhotos(showKey);
+  };
+
+  // Setlist recap handlers
+  const handleSetlistSave = async (show: string) => {
+    const songs = setlistDraft.split('\n').map(s => s.trim()).filter(Boolean);
+    if (songs.length === 0) return;
+    const res = await fetch('/api/setlist-recap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ show, songs }),
+    });
+    if (res.ok) {
+      setActualSetlists(prev => ({ ...prev, [show]: songs }));
+      setShowRecap(null);
+      setSetlistDraft('');
+    }
+  };
+
+  const openRecap = (showKey: string) => {
+    setShowRecap(showKey);
+    setSetlistDraft(actualSetlists[showKey]?.join('\n') || '');
   };
 
   // Countdown timer
@@ -363,6 +429,13 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
         >
           🎵 Setlist
         </button>
+        <button
+          className="header-action-button"
+          onClick={() => { setShowPhotos(true); fetchPhotos(); }}
+          title="Trip Photos"
+        >
+          📸 Photos
+        </button>
         <button className="logout-button" onClick={handleLogout} title="Back to login">
           ← Exit
         </button>
@@ -446,16 +519,154 @@ function ChatPage({ onLogout }: { onLogout: () => void }) {
         </div>
       )}
 
+      {/* Photo Gallery Modal */}
+      {showPhotos && (
+        <div className="modal-overlay" onClick={() => { setShowPhotos(false); setSelectedPhoto(null); }}>
+          <div className="modal-content photo-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Trip Photos</h3>
+              <button className="modal-close" onClick={() => { setShowPhotos(false); setSelectedPhoto(null); }}>✕</button>
+            </div>
+            <div className="photo-toolbar">
+              <div className="photo-filter-tabs">
+                {['all', 'general', 'show-1', 'show-2', 'show-3'].map(f => (
+                  <button
+                    key={f}
+                    className={`photo-filter-tab ${photoFilter === f ? 'active' : ''}`}
+                    onClick={() => { setPhotoFilter(f); fetchPhotos(f); }}
+                  >
+                    {f === 'all' ? 'All' : f === 'general' ? 'General' : `Show ${f.split('-')[1]}`}
+                  </button>
+                ))}
+              </div>
+              <div className="photo-upload-row">
+                <select
+                  className="photo-show-select"
+                  value={uploadShow}
+                  onChange={e => setUploadShow(e.target.value)}
+                >
+                  <option value="general">General</option>
+                  <option value="show-1">Show 1</option>
+                  <option value="show-2">Show 2</option>
+                  <option value="show-3">Show 3</option>
+                </select>
+                <label className="photo-upload-btn">
+                  {uploading ? 'Uploading...' : '+ Add Photo'}
+                  <input type="file" accept="image/*" capture="environment" hidden onChange={handlePhotoUpload} disabled={uploading} />
+                </label>
+              </div>
+            </div>
+            <div className="modal-body">
+              {selectedPhoto ? (
+                <div className="photo-fullsize">
+                  <button className="photo-back-btn" onClick={() => setSelectedPhoto(null)}>← Back</button>
+                  <img src={selectedPhoto} alt="Full size" className="photo-full-img" />
+                </div>
+              ) : (
+                <div className="photo-grid">
+                  {photos.map((photo, i) => (
+                    <div key={i} className="photo-thumb" onClick={() => setSelectedPhoto(photo.url)}>
+                      <img src={photo.url} alt={photo.filename} />
+                    </div>
+                  ))}
+                  {photos.length === 0 && (
+                    <p className="photo-empty">No photos yet. Be the first to share!</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Setlist Recap Modal */}
+      {showRecap && (
+        <div className="modal-overlay" onClick={() => { setShowRecap(null); setSetlistDraft(''); }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Setlist — {SHOW_DATES[parseInt(showRecap.split('-')[1]) - 1]?.label}</h3>
+              <button className="modal-close" onClick={() => { setShowRecap(null); setSetlistDraft(''); }}>✕</button>
+            </div>
+            <div className="modal-body">
+              {actualSetlists[showRecap] && actualSetlists[showRecap].length > 0 ? (
+                <>
+                  <ol className="setlist-recap-list">
+                    {actualSetlists[showRecap].map((song, i) => (
+                      <li key={i}>{song}</li>
+                    ))}
+                  </ol>
+                  <button
+                    className="recap-edit-btn"
+                    onClick={() => setSetlistDraft(actualSetlists[showRecap].join('\n'))}
+                    style={{ marginTop: '12px' }}
+                  >
+                    ✏️ Edit Setlist
+                  </button>
+                  {setlistDraft && (
+                    <>
+                      <textarea
+                        className="setlist-recap-textarea"
+                        value={setlistDraft}
+                        onChange={e => setSetlistDraft(e.target.value)}
+                        placeholder="One song per line..."
+                        style={{ marginTop: '12px' }}
+                      />
+                      <button className="setlist-save-btn" onClick={() => handleSetlistSave(showRecap)}>
+                        Save Setlist
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '12px', fontSize: '14px' }}>
+                    No setlist recorded yet. Add the songs that were played!
+                  </p>
+                  <textarea
+                    className="setlist-recap-textarea"
+                    value={setlistDraft}
+                    onChange={e => setSetlistDraft(e.target.value)}
+                    placeholder="One song per line...&#10;Tom Sawyer&#10;The Spirit of Radio&#10;YYZ"
+                  />
+                  <button className="setlist-save-btn" onClick={() => handleSetlistSave(showRecap)}>
+                    Save Setlist
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Countdown Timer */}
       <div className="countdown-bar">
-        {SHOW_DATES.map((show, i) => (
-          <div key={i} className="countdown-item">
+        {SHOW_DATES.map((show, i) => {
+          const showKey = `show-${i + 1}`;
+          const isPast = show.date.getTime() < Date.now();
+
+          return (
+          <div key={i} className={`countdown-item ${isPast ? 'show-rocked' : ''}`}>
             <span className="countdown-label">{show.label}</span>
-            <span className="countdown-value">
-              {countdowns[i] ?? '🤘 ROCKED!'}
-            </span>
+            {isPast ? (
+              <div className="rocked-recap">
+                <span className="rocked-badge">✅ ROCKED!</span>
+                <div className="rocked-actions">
+                  <button className="recap-btn" onClick={() => openRecap(showKey)}>
+                    📋 Setlist
+                  </button>
+                  <button className="recap-btn" onClick={() => openPhotosForShow(showKey)}>
+                    📸 Photos
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <span className="countdown-value">
+                {countdowns[i] ?? '🤘 ROCKED!'}
+              </span>
+            )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Messages */}
