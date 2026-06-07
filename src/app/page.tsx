@@ -503,15 +503,23 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
     setSetlistDraft(actualSetlists[showKey]?.join('\n') || '');
   };
 
-  const openBingo = () => {
-    fetchAllBingoPicks();
-    const myPicks = allBingoPicks[currentUser.toLowerCase().trim()];
-    if (myPicks) {
-      setBingoPicks(myPicks.songs);
-      setBingoFirst(myPicks.firstSong);
-      setBingoLast(myPicks.lastSong);
-    }
+  const openBingo = async () => {
     setShowBingo(true);
+    try {
+      const res = await fetch('/api/bingo-picks');
+      if (res.ok) {
+        const data = await res.json();
+        setAllBingoPicks(data);
+        const myPicks = data[currentUser.toLowerCase().trim()];
+        if (myPicks) {
+          setBingoPicks(myPicks.songs);
+          setBingoFirst(myPicks.firstSong);
+          setBingoLast(myPicks.lastSong);
+        }
+      }
+    } catch {
+      // fetch failed, use existing state
+    }
   };
 
   const toggleBingoPick = (title: string) => {
@@ -1151,7 +1159,7 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
               <button className={`album-tab ${bingoTab === 'pick' ? 'active' : ''}`} onClick={() => setBingoTab('pick')}>
                 🎯 My Picks
               </button>
-              <button className={`album-tab ${bingoTab === 'everyone' ? 'active' : ''}`} onClick={() => { setBingoTab('everyone'); fetchAllBingoPicks(); }}>
+              <button className={`album-tab ${bingoTab === 'everyone' ? 'active' : ''}`} onClick={() => setBingoTab('everyone')}>
                 👥 Everyone
               </button>
             </div>
