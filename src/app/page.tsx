@@ -530,7 +530,7 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
   const saveBingoPicks = async () => {
     setBingoSaving(true);
     try {
-      await fetch('/api/bingo-picks', {
+      const res = await fetch('/api/bingo-picks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -538,7 +538,17 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
           picks: { songs: bingoPicks, firstSong: bingoFirst, lastSong: bingoLast },
         }),
       });
-      fetchAllBingoPicks();
+      if (res.ok) {
+        setAllBingoPicks(prev => ({
+          ...prev,
+          [currentUser.toLowerCase().trim()]: {
+            songs: bingoPicks,
+            firstSong: bingoFirst,
+            lastSong: bingoLast,
+            updatedAt: new Date().toISOString(),
+          },
+        }));
+      }
     } catch {
       // save failed
     } finally {
