@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useMemo, FormEvent, KeyboardEvent } from '
 import { RUSH_QUOTES } from '@/lib/rush-quotes';
 import { SETLIST_SONGS, LIKELIHOOD_LABELS } from '@/lib/setlist-data';
 import type { SetlistSong } from '@/lib/setlist-data';
+import { RUSH_DISCOGRAPHY, ALBUM_NAMES } from '@/lib/rush-discography';
+import type { BingoPick } from '@/app/api/bingo-picks/route';
 
 // ===== TRIP ITINERARY =====
 const ITINERARY: Array<{
@@ -388,6 +390,16 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
   const [actualSetlists, setActualSetlists] = useState<Record<string, string[]>>({});
   const [showRecap, setShowRecap] = useState<string | null>(null);
   const [setlistDraft, setSetlistDraft] = useState('');
+  // Rush Bingo
+  const [showBingo, setShowBingo] = useState(false);
+  const [bingoTab, setBingoTab] = useState<'pick' | 'everyone'>('pick');
+  const [bingoPicks, setBingoPicks] = useState<string[]>([]);
+  const [bingoFirst, setBingoFirst] = useState<string | null>(null);
+  const [bingoLast, setBingoLast] = useState<string | null>(null);
+  const [bingoAlbumFilter, setBingoAlbumFilter] = useState<string>('All');
+  const [bingoSearch, setBingoSearch] = useState('');
+  const [allBingoPicks, setAllBingoPicks] = useState<Record<string, BingoPick>>({});
+  const [bingoSaving, setBingoSaving] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -402,11 +414,16 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
     fetch('/api/album-ratings').then(r => r.ok ? r.json() : {}).then(setAllUserRatings).catch(() => {});
   };
 
+  const fetchAllBingoPicks = () => {
+    fetch('/api/bingo-picks').then(r => r.ok ? r.json() : {}).then(setAllBingoPicks).catch(() => {});
+  };
+
   useEffect(() => {
     setAlbumRatings(getAlbumRatings());
     setSetlistVotes(getSetlistVotes());
     fetch('/api/setlist-recap').then(r => r.ok ? r.json() : {}).then(setActualSetlists).catch(() => {});
     fetchAllRatings();
+    fetchAllBingoPicks();
   }, []);
 
   const starsUsed = getStarsUsed(albumRatings);
@@ -485,6 +502,55 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
     setShowRecap(showKey);
     setSetlistDraft(actualSetlists[showKey]?.join('\n') || '');
   };
+
+  const openBingo = () => {
+    fetchAllBingoPicks();
+    const myPicks = allBingoPicks[currentUser.toLowerCase().trim()];
+    if (myPicks) {
+      setBingoPicks(myPicks.songs);
+      setBingoFirst(myPicks.firstSong);
+      setBingoLast(myPicks.lastSong);
+    }
+    setShowBingo(true);
+  };
+
+  const toggleBingoPick = (title: string) => {
+    setBingoPicks(prev => {
+      if (prev.includes(title)) {
+        const removed = prev.filter(s => s !== title);
+        if (bingoFirst === title) setBingoFirst(null);
+        if (bingoLast === title) setBingoLast(null);
+        return removed;
+      }
+      if (prev.length >= 20) return prev;
+      return [...prev, title];
+    });
+  };
+
+  const saveBingoPicks = async () => {
+    setBingoSaving(true);
+    try {
+      await fetch('/api/bingo-picks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: currentUser,
+          picks: { songs: bingoPicks, firstSong: bingoFirst, lastSong: bingoLast },
+        }),
+      });
+      fetchAllBingoPicks();
+    } catch {
+      // save failed
+    } finally {
+      setBingoSaving(false);
+    }
+  };
+
+  const filteredBingoSongs = RUSH_DISCOGRAPHY.filter(song => {
+    const matchesAlbum = bingoAlbumFilter === 'All' || song.album === bingoAlbumFilter;
+    const matchesSearch = !bingoSearch || song.title.toLowerCase().includes(bingoSearch.toLowerCase());
+    return matchesAlbum && matchesSearch;
+  });
 
   const clearChat = () => {
     setMessages([]);
@@ -635,6 +701,9 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
           </button>
           <button className="header-action-button" onClick={() => setShowSetlist(true)} title="Setlist Predictions">
             🎵 <span className="btn-label">Setlist</span>
+          </button>
+          <button className="header-action-button" onClick={openBingo} title="Rush Bingo">
+            🎯 <span className="btn-label">Bingo</span>
           </button>
           <button className="header-action-button" onClick={() => { setShowPhotos(true); fetchPhotos(); }} title="Trip Photos">
             📸 <span className="btn-label">Photos</span>
@@ -1056,6 +1125,159 @@ function ChatPage({ onLogout, currentUser }: { onLogout: () => void; currentUser
                 </>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rush Bingo Modal */}
+      {showBingo && (
+        <div className="modal-overlay" onClick={() => setShowBingo(false)}>
+          <div className="modal-content bingo-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Rush Bingo</h3>
+              <button className="modal-close" onClick={() => setShowBingo(false)}>✕</button>
+            </div>
+            <div className="album-tabs">
+              <button className={`album-tab ${bingoTab === 'pick' ? 'active' : ''}`} onClick={() => setBingoTab('pick')}>
+                🎯 My Picks
+              </button>
+              <button className={`album-tab ${bingoTab === 'everyone' ? 'active' : ''}`} onClick={() => { setBingoTab('everyone'); fetchAllBingoPicks(); }}>
+                👥 Everyone
+              </button>
+            </div>
+
+            {bingoTab === 'pick' ? (
+              <>
+                <div className="bingo-status-bar">
+                  <div className="bingo-count">
+                    <span className="bingo-count-label">Setlist Picks</span>
+                    <span className={`bingo-count-value ${bingoPicks.length === 20 ? 'full' : ''}`}>
+                      {bingoPicks.length} / 20
+                    </span>
+                  </div>
+                  <div className="bingo-tags">
+                    <span className={`bingo-tag ${bingoFirst ? 'set' : ''}`}>
+                      1st: {bingoFirst || '—'}
+                    </span>
+                    <span className={`bingo-tag ${bingoLast ? 'set' : ''}`}>
+                      Last: {bingoLast || '—'}
+                    </span>
+                  </div>
+                </div>
+
+                {bingoPicks.length > 0 && (
+                  <div className="bingo-my-picks">
+                    <div className="bingo-picks-header">
+                      <span>Your Setlist</span>
+                      <button className="bingo-save-btn" onClick={saveBingoPicks} disabled={bingoSaving}>
+                        {bingoSaving ? 'Saving...' : 'Save Picks'}
+                      </button>
+                    </div>
+                    <div className="bingo-picks-list">
+                      {bingoPicks.map((title, i) => (
+                        <div key={title} className="bingo-pick-item">
+                          <span className="bingo-pick-num">{i + 1}</span>
+                          <span className="bingo-pick-title">{title}</span>
+                          <div className="bingo-pick-actions">
+                            <button
+                              className={`bingo-tag-btn ${bingoFirst === title ? 'active-first' : ''}`}
+                              onClick={() => setBingoFirst(bingoFirst === title ? null : title)}
+                              title="Tag as first song"
+                            >
+                              1st
+                            </button>
+                            <button
+                              className={`bingo-tag-btn ${bingoLast === title ? 'active-last' : ''}`}
+                              onClick={() => setBingoLast(bingoLast === title ? null : title)}
+                              title="Tag as last song"
+                            >
+                              Last
+                            </button>
+                            <button
+                              className="bingo-remove-btn"
+                              onClick={() => toggleBingoPick(title)}
+                              title="Remove"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="bingo-browser">
+                  <div className="bingo-filters">
+                    <input
+                      className="bingo-search"
+                      type="text"
+                      placeholder="Search songs..."
+                      value={bingoSearch}
+                      onChange={e => setBingoSearch(e.target.value)}
+                    />
+                    <select
+                      className="bingo-album-select"
+                      value={bingoAlbumFilter}
+                      onChange={e => setBingoAlbumFilter(e.target.value)}
+                    >
+                      <option value="All">All Albums</option>
+                      {ALBUM_NAMES.map(name => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="bingo-song-list">
+                    {filteredBingoSongs.map(song => {
+                      const picked = bingoPicks.includes(song.title);
+                      return (
+                        <div
+                          key={`${song.albumId}-${song.title}`}
+                          className={`bingo-song-row ${picked ? 'picked' : ''}`}
+                          onClick={() => toggleBingoPick(song.title)}
+                        >
+                          <div className="bingo-song-info">
+                            <span className="bingo-song-title">{song.title}</span>
+                            <span className="bingo-song-album">{song.album} ({song.year})</span>
+                          </div>
+                          <span className={`bingo-check ${picked ? 'checked' : ''}`}>
+                            {picked ? '✓' : '+'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {filteredBingoSongs.length === 0 && (
+                      <p className="bingo-empty">No songs match your search.</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="modal-body">
+                {(() => {
+                  const entries = Object.entries(allBingoPicks);
+                  if (entries.length === 0) return <p className="results-empty">No one has made picks yet — be the first!</p>;
+                  return entries.map(([name, picks]) => (
+                    <div key={name} className="bingo-user-card">
+                      <h4 className="bingo-user-name">{name.charAt(0).toUpperCase() + name.slice(1)}</h4>
+                      <div className="bingo-user-tags">
+                        {picks.firstSong && <span className="bingo-tag set">1st: {picks.firstSong}</span>}
+                        {picks.lastSong && <span className="bingo-tag set">Last: {picks.lastSong}</span>}
+                      </div>
+                      <ol className="bingo-user-songs">
+                        {picks.songs.map((song, i) => (
+                          <li key={i} className={`${song === picks.firstSong ? 'bingo-first' : ''} ${song === picks.lastSong ? 'bingo-last' : ''}`}>
+                            {song}
+                            {song === picks.firstSong && <span className="bingo-badge first">1st</span>}
+                            {song === picks.lastSong && <span className="bingo-badge last">Last</span>}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ));
+                })()}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1773,6 +1773,403 @@ body {
   box-shadow: 0 4px 16px var(--rush-red-glow);
 }
 
+/* ===== RUSH BINGO ===== */
+.bingo-modal {
+  max-width: 540px;
+}
+
+.bingo-status-bar {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(196, 18, 48, 0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bingo-count {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bingo-count-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bingo-count-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.bingo-count-value.full {
+  color: var(--rush-gold);
+}
+
+.bingo-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.bingo-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.bingo-tag.set {
+  background: rgba(212, 168, 67, 0.12);
+  border-color: rgba(212, 168, 67, 0.3);
+  color: var(--rush-gold);
+}
+
+.bingo-my-picks {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bingo-picks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 24px;
+  background: rgba(212, 168, 67, 0.04);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rush-gold);
+}
+
+.bingo-save-btn {
+  background: linear-gradient(135deg, var(--rush-red), #a00e28);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.2s;
+}
+
+.bingo-save-btn:hover {
+  box-shadow: 0 4px 16px var(--rush-red-glow);
+}
+
+.bingo-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bingo-picks-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px 24px;
+}
+
+.bingo-picks-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bingo-picks-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.bingo-pick-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13px;
+}
+
+.bingo-pick-item:last-child {
+  border-bottom: none;
+}
+
+.bingo-pick-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 20px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.bingo-pick-title {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bingo-pick-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.bingo-tag-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.2s;
+}
+
+.bingo-tag-btn:hover {
+  border-color: var(--rush-gold);
+  color: var(--text-secondary);
+}
+
+.bingo-tag-btn.active-first {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.4);
+  color: #81c784;
+}
+
+.bingo-tag-btn.active-last {
+  background: rgba(156, 39, 176, 0.15);
+  border-color: rgba(156, 39, 176, 0.4);
+  color: #ce93d8;
+}
+
+.bingo-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: color 0.2s;
+}
+
+.bingo-remove-btn:hover {
+  color: var(--rush-red-light);
+}
+
+.bingo-browser {
+  display: flex;
+  flex-direction: column;
+}
+
+.bingo-filters {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bingo-search {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  outline: none;
+}
+
+.bingo-search:focus {
+  border-color: var(--rush-red);
+  box-shadow: 0 0 0 2px var(--rush-red-glow);
+}
+
+.bingo-search::placeholder {
+  color: var(--text-muted);
+}
+
+.bingo-album-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 6px 8px;
+  font-family: var(--font-family);
+  max-width: 150px;
+}
+
+.bingo-song-list {
+  overflow-y: auto;
+  max-height: 300px;
+  padding: 0 24px;
+}
+
+.bingo-song-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bingo-song-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.bingo-song-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 4px;
+}
+
+.bingo-song-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.bingo-song-row.picked {
+  background: rgba(212, 168, 67, 0.06);
+}
+
+.bingo-song-row:last-child {
+  border-bottom: none;
+}
+
+.bingo-song-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.bingo-song-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bingo-song-album {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.bingo-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.bingo-check.checked {
+  background: rgba(212, 168, 67, 0.2);
+  border-color: var(--rush-gold);
+  color: var(--rush-gold);
+}
+
+.bingo-empty {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 24px 0;
+  font-size: 13px;
+}
+
+.bingo-user-card {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bingo-user-card:last-child {
+  border-bottom: none;
+}
+
+.bingo-user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.bingo-user-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bingo-user-songs {
+  list-style: decimal;
+  padding-left: 24px;
+}
+
+.bingo-user-songs li {
+  padding: 3px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.bingo-user-songs li:last-child {
+  border-bottom: none;
+}
+
+.bingo-user-songs li.bingo-first {
+  color: #81c784;
+  font-weight: 600;
+}
+
+.bingo-user-songs li.bingo-last {
+  color: #ce93d8;
+  font-weight: 600;
+}
+
+.bingo-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bingo-badge.first {
+  background: rgba(76, 175, 80, 0.15);
+  color: #81c784;
+}
+
+.bingo-badge.last {
+  background: rgba(156, 39, 176, 0.15);
+  color: #ce93d8;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 600px) {
   .login-container {
@@ -1894,5 +2291,34 @@ body {
   .recap-btn {
     font-size: 9px;
     padding: 2px 6px;
+  }
+
+  .bingo-modal {
+    max-width: 100%;
+  }
+
+  .bingo-status-bar {
+    padding: 10px 16px;
+  }
+
+  .bingo-filters {
+    padding: 10px 16px;
+    flex-direction: column;
+  }
+
+  .bingo-album-select {
+    max-width: 100%;
+  }
+
+  .bingo-song-list {
+    padding: 0 16px;
+  }
+
+  .bingo-picks-list {
+    padding: 4px 16px;
+  }
+
+  .bingo-picks-header {
+    padding: 8px 16px;
   }
 }
