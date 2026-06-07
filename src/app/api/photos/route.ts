@@ -3,7 +3,7 @@ import { put, list } from '@vercel/blob';
 
 export async function GET(req: NextRequest) {
   const authCookie = req.cookies.get('rushbot-auth');
-  if (!authCookie || authCookie.value !== 'authenticated') {
+  if (!authCookie || !authCookie.value) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const authCookie = req.cookies.get('rushbot-auth');
-  if (!authCookie || authCookie.value !== 'authenticated') {
+  if (!authCookie || !authCookie.value) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -5,7 +5,7 @@ import { SYSTEM_PROMPT } from '@/lib/system-prompt';
 export async function POST(req: NextRequest) {
   // Check auth
   const authCookie = req.cookies.get('rushbot-auth');
-  if (!authCookie || authCookie.value !== 'authenticated') {
+  if (!authCookie || !authCookie.value) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
